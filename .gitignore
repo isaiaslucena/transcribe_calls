@@ -1,2 +1,4 @@
 *.log
 temp/
+notranscfiles.txt
+delete_all.sh
