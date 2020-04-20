@@ -28,19 +28,19 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 # tyea=$(date +%Y)
 # tyea=2020
 # for day in $(seq -f "%02g" 1 9) ; do
-	 # todaydate=${day}${tmon}${tyea}
-	 # todaydate=${day}012019
-	 echo "${todaydate}"
+	# todaydate=${day}${tmon}${tyea}
+	# todaydate=${day}012019
+	#  echo "${todaydate}"
 
 	#get the companies and URLs with port
 	curl -s -o "${tempcojson}" "${companiesurl}"
 	arrn=$(($(jq ". | length" "${tempcojson}")-1))
 	for companyarrn in $(seq 0 "${arrn}") ; do
 		coid=$(jq --raw-output .[${companyarrn}].id "${tempcojson}")
-		coname=$(jq --raw-output .[${companyarrn}].name "${tempcojson}")
+		# coname=$(jq --raw-output .[${companyarrn}].name "${tempcojson}")
 		curl=$(jq --raw-output .[${companyarrn}].url_rec "${tempcojson}")
 		curlport=$(jq --raw-output .[${companyarrn}].url_rec_port "${tempcojson}")
-		cdbname=$(jq --raw-output .[${companyarrn}].db "${tempcojson}")
+		# cdbname=$(jq --raw-output .[${companyarrn}].db "${tempcojson}")
 
 		if [[ "${coid}" == 1 ]] ; then
 			#echo "Company:" "${coname}"
@@ -106,17 +106,23 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 						respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
 
 						if [[ "${resptext}" == "null" ]] ; then
-							echo "response CPqD NULL!"
+							# echo "response CPqD NULL!"
 							echo "${filename}" >> "${notranscfiles}"
-						else
-							rm -rf ${tempfolder}${wavfile}
 						fi
 
 						temppostsolr=${tempfolder}${filename}"_postsolr.json"
 						echo "Saving into Solr..."
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${filename}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${transcstart}'","transc_end":"'${transcend}'","text_content":'${resptext}',"text_times":'${respparts}'}' > "${temppostsolr}"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
+
+						checkfileex=$(curl -s ${checksolr}"/"${coid}"/"${filename})
+						if [[ "${checkfileex}" -eq 1 ]] ; then
+							removefileurl="http://"${curl}":"${curlport}"/api/removefile?date="${todaydate}"&file="${filename}
+							curl -s "${removefileurl}"
+						fi
+
 						sleep 1
+						rm -rf ${tempfolder}${wavfile}
 						rm -rf "${temppostsolr}"
 						rm -rf ${tempfolder}${filename}"_respsave.json"
 						rm -rf "${tempfileinfo}"
@@ -167,6 +173,9 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 				echo "Done!"
 				echo
 			fi
+
+			sleep 1
+			rm -rf "${tempnoanswer}"
 		fi
 	done
 # done
