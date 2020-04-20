@@ -1,7 +1,7 @@
 #!/bin/bash
 
-todaydate=$(date +%d%m%Y)
-todaydateiso=$(date +"%Y-%m-%d")
+# todaydate=$(date +%d%m%Y)
+# todaydateiso=$(date +"%Y-%m-%d")
 
 tempfolder="/applications/send_to_transc/temp/"
 tempcojson=${tempfolder}"companies.json"
@@ -24,13 +24,16 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 
 # tday=$(date +%d)
 # tmon=$(date +%m)
+tmon="${2}"
 # tmon=02
 # tyea=$(date +%Y)
 # tyea=2020
-# for day in $(seq -f "%02g" 1 9) ; do
-	# todaydate=${day}${tmon}${tyea}
+tyea="${1}"
+for day in $(seq -f "%02g" 1 31) ; do
+	todaydate=${day}${tmon}${tyea}
+	todaydateiso=${tyea}-${tmon}-${day}
 	# todaydate=${day}012019
-	#  echo "${todaydate}"
+	echo "${todaydate}"
 
 	#get the companies and URLs with port
 	curl -s -o "${tempcojson}" "${companiesurl}"
@@ -53,20 +56,20 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 				filename=$(jq --raw-output .[${filen}] "${tempfijson}")
 				filenameurl="http://"${curl}":"${curlport}"/api/getfile?date="${todaydate}"&file="${filename}
 
+				filefinalfolder=${filesfolder}${coid}"/"${todaydate}
+				if [[ ! -d "${filefinalfolder}" ]] ; then
+					mkdir -p "${filefinalfolder}"
+				fi
+
+				filedpath=${filefinalfolder}"/"${filename}
+				if [[ ! -f "${filedpath}" ]] ; then
+					curl -s -o "${filedpath}" "${filenameurl}"
+				fi
+
 				#verify if exists on solr
 				checkfileex=$(curl -s ${checksolr}"/"${coid}"/"${filename})
 				if [[ "${checkfileex}" -eq 0 ]] ; then
 					echo "${filename}"
-
-					filefinalfolder=${filesfolder}${coid}"/"${todaydate}
-					if [[ ! -d "${filefinalfolder}" ]] ; then
-						mkdir -p "${filefinalfolder}"
-					fi
-
-					filedpath=${filefinalfolder}"/"${filename}
-					if [[ ! -f "${filedpath}" ]] ; then
-						curl -s -o "${filedpath}" "${filenameurl}"
-					fi
 
 					#get the file info
 					getfileiurl="http://"${curl}":"${curlport}"/api/getfileinfo?filename="${filename}
@@ -129,6 +132,9 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 						rm -rf "${temptransrep}"
 					fi
 					echo
+				elif [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
+					removefileurl="http://"${curl}":"${curlport}"/api/removefile?date="${todaydate}"&file="${filename}
+					curl -s "${removefileurl}"
 				fi
 			done
 
@@ -164,18 +170,17 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${fnfilen}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${fstartrec}'","transc_end":"'${fstartrec}'","text_content":["no answer"],"text_times":"[\"no answer\"]"}' > "${temppostsolr}"
 						curl -s -o "${tempfolder}""respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
 						# jq . ${tempfolder}${fnfilen}"_respsave_noanswer.json"
-						sleep 1
-						rm -rf "${tempfolder}""respsave.json"
-						rm -rf "${tempnoanswer}"
 						echo
 					fi
+
+					sleep 1
+					rm -rf ${tempfolder}"respsave.json"
+					rm -rf "${tempnoanswer}"
 				done
+
 				echo "Done!"
 				echo
 			fi
-
-			sleep 1
-			rm -rf "${tempnoanswer}"
 		fi
 	done
-# done
+done
