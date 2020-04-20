@@ -116,7 +116,7 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
 
 						checkfileex=$(curl -s ${checksolr}"/"${coid}"/"${filename})
-						if [[ "${checkfileex}" -eq 1 ]] ; then
+						if [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
 							removefileurl="http://"${curl}":"${curlport}"/api/removefile?date="${todaydate}"&file="${filename}
 							curl -s "${removefileurl}"
 						fi
