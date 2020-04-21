@@ -164,11 +164,12 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${fnfilen}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${fstartrec}'","transc_end":"'${fstartrec}'","text_content":["no answer"],"text_times":"[\"no answer\"]"}' > "${temppostsolr}"
 						curl -s -o "${tempfolder}""respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
 						# jq . ${tempfolder}${fnfilen}"_respsave_noanswer.json"
-						sleep 1
-						rm -rf "${tempfolder}""respsave.json"
-						rm -rf "${tempnoanswer}"
 						echo
 					fi
+
+					sleep 1
+					rm -rf ${tempfolder}"respsave.json"
+					rm -rf "${tempnoanswer}"
 				done
 				echo "Done!"
 				echo
