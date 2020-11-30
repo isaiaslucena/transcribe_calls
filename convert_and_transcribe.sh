@@ -22,6 +22,8 @@ checksolrnoaw="http://127.0.0.1:83/api/check_noanswer"
 transcurl="http://127.0.0.1:8025/asr-server/rest/recognize"
 savetransurl="http://127.0.0.1:83/api/save_file"
 
+stop_at_insert="${4}"
+
 # tday=$(date +%d)
 # tmon=$(date +%m)
 tmon="${1}"
@@ -108,7 +110,7 @@ for day in $(seq -f "%02g" 1 30) ; do
 						# respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
 
 						resptext="sem texto"
-						respparts="[]"
+						respparts="[{\"text\":\"sem texto\",\"score\":100,\"start_time\":0.1,\"end_time\":1.0}"
 
 						# if [[ "${resptext}" == "null" ]] ; then
 							# echo "response CPqD NULL!"
@@ -119,6 +121,9 @@ for day in $(seq -f "%02g" 1 30) ; do
 						echo "Saving into Solr..."
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${filename}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${transcstart}'","transc_end":"'${transcend}'","text_content":"'${resptext}'","text_times":"'${respparts}'"}' > "${temppostsolr}"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
+						if [[ "${stop_at_insert}" == "stop" ]] ; then
+							read
+						fi
 
 						checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 						if [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
