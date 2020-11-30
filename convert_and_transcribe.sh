@@ -22,7 +22,7 @@ checksolrnoaw="http://127.0.0.1:83/api/check_noanswer"
 transcurl="http://127.0.0.1:8025/asr-server/rest/recognize"
 savetransurl="http://127.0.0.1:83/api/save_file"
 
-stop_at_insert="${4}"
+stop_at_insert="${3}"
 
 # tday=$(date +%d)
 # tmon=$(date +%m)
