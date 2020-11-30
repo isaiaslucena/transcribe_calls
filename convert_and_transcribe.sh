@@ -24,8 +24,10 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 
 # tday=$(date +%d)
 # tmon=$(date +%m)
+tmon="${1}"
 tmon=10
-tyea=$(date +%Y)
+tyea="${2}"
+# tyea=$(date +%Y)
 # tyea=2020
 for day in $(seq -f "%02g" 1 30) ; do
 	todaydate=${day}${tmon}${tyea}
@@ -97,13 +99,16 @@ for day in $(seq -f "%02g" 1 30) ; do
 
 						#send to transcribe
 						# echo "Starting transcribe..."
-						# transcstart=$(date +'%Y-%m-%dT%H:%M:%SZ')
+						transcstart=$(date +'%Y-%m-%dT%H:%M:%SZ')
 						# temptransrep=${tempfolder}${filename}"_transcription.json"
 						# curl -s -o "${temptransrep}" --header "Content-Type: audio/wav" --header "decoder.continuousMode: true" --data-binary "@"${tempfolder}${wavfile} "${transcurl}"
-						# transcend=$(date +'%Y-%m-%dT%H:%M:%SZ')
+						transcend=$(date +'%Y-%m-%dT%H:%M:%SZ')
 
 						# resptext=$(jq --compact-output .[0].alternatives[0].text "${temptransrep}")
 						# respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
+
+						resptext=""
+						respparts="[]"
 
 						# if [[ "${resptext}" == "null" ]] ; then
 							# echo "response CPqD NULL!"
