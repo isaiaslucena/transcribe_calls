@@ -110,7 +110,7 @@ for day in $(seq -f "%02g" 1 30) ; do
 						# respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
 
 						resptext="sem texto"
-						respparts="[{\\\"text\\\":\\\"sem texto\\\",\\\"score\\\":100,\\\"start_time\\\":0.1,\\\"end_time\\\":1.0}"
+						respparts="[{\\\"text\\\":\\\"sem texto\\\",\\\"score\\\":100,\\\"start_time\\\":0.1,\\\"end_time\\\":1.0}]"
 
 						# if [[ "${resptext}" == "null" ]] ; then
 							# echo "response CPqD NULL!"
