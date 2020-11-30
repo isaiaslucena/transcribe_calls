@@ -46,31 +46,31 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 			#echo "Company:" "${coname}"
 			#echo "Id:" "${coid}"
 
-			getfilesurl="http://"${curl}":"${curlport}"/api/getfilelist?date="${todaydate}
+			getfilesurl="http://${curl}:${curlport}/api/getfilelist?date=${todaydate}"
 			curl -s -o "${tempfijson}" "${getfilesurl}"
 			arrn=$(($(jq ". | length" "${tempfijson}")-1))
 			for filen in $(seq 0 "${arrn}") ; do
 				filename=$(jq --raw-output .[${filen}] "${tempfijson}")
-				filenameurl="http://"${curl}":"${curlport}"/api/getfile?date="${todaydate}"&file="${filename}
+				filenameurl="http://${curl}:${curlport}/api/getfile?date=${todaydate}&file=${filename}"
 
 				#verify if exists on solr
-				checkfileex=$(curl -s ${checksolr}"/"${coid}"/"${filename})
+				checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 				if [[ "${checkfileex}" -eq 0 ]] ; then
 					echo "${filename}"
 
-					filefinalfolder=${filesfolder}${coid}"/"${todaydate}
+					filefinalfolder="${filesfolder}${coid}/${todaydate}"
 					if [[ ! -d "${filefinalfolder}" ]] ; then
 						mkdir -p "${filefinalfolder}"
 					fi
 
-					filedpath=${filefinalfolder}"/"${filename}
+					filedpath="${filefinalfolder}/${filename}"
 					if [[ ! -f "${filedpath}" ]] ; then
 						curl -s -o "${filedpath}" "${filenameurl}"
 					fi
 
 					#get the file info
-					getfileiurl="http://"${curl}":"${curlport}"/api/getfileinfo?filename="${filename}
-					tempfileinfo=${tempfolder}${filename}"_fileinfo.json"
+					getfileiurl="http://${curl}:${curlport}/api/getfileinfo?filename=${filename}"
+					tempfileinfo="${tempfolder}${filename}_fileinfo.json"
 					curl -s -o "${tempfileinfo}" "${getfileiurl}"
 
 					fcodigo=$(jq --raw-output .[0].Codigo "${tempfileinfo}")
@@ -91,33 +91,33 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 						jsonfile=$(echo "${filename}" | sed -e "s/.mp3/.json/g")
 
 						#convert to audio rate 8k and raise volume 10dB
-						echo "Converting to wav..."
-						ffmpeg -loglevel quiet -i "${filedpath}" -ar 8k -filter:a "volume=10dB" -y ${tempfolder}${wavfile}
-						sleep 3
+						# echo "Converting to wav..."
+						# ffmpeg -loglevel quiet -i "${filedpath}" -ar 8k -filter:a "volume=10dB" -y ${tempfolder}${wavfile}
+						# sleep 3
 
 						#send to transcribe
-						echo "Starting transcribe..."
-						transcstart=$(date +'%Y-%m-%dT%H:%M:%SZ')
-						temptransrep=${tempfolder}${filename}"_transcription.json"
-						curl -s -o "${temptransrep}" --header "Content-Type: audio/wav" --header "decoder.continuousMode: true" --data-binary "@"${tempfolder}${wavfile} "${transcurl}"
-						transcend=$(date +'%Y-%m-%dT%H:%M:%SZ')
+						# echo "Starting transcribe..."
+						# transcstart=$(date +'%Y-%m-%dT%H:%M:%SZ')
+						# temptransrep=${tempfolder}${filename}"_transcription.json"
+						# curl -s -o "${temptransrep}" --header "Content-Type: audio/wav" --header "decoder.continuousMode: true" --data-binary "@"${tempfolder}${wavfile} "${transcurl}"
+						# transcend=$(date +'%Y-%m-%dT%H:%M:%SZ')
 
-						resptext=$(jq --compact-output .[0].alternatives[0].text "${temptransrep}")
-						respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
+						# resptext=$(jq --compact-output .[0].alternatives[0].text "${temptransrep}")
+						# respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
 
-						if [[ "${resptext}" == "null" ]] ; then
+						# if [[ "${resptext}" == "null" ]] ; then
 							# echo "response CPqD NULL!"
-							echo "${filename}" >> "${notranscfiles}"
-						fi
+							# echo "${filename}" >> "${notranscfiles}"
+						# fi
 
 						temppostsolr=${tempfolder}${filename}"_postsolr.json"
 						echo "Saving into Solr..."
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${filename}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${transcstart}'","transc_end":"'${transcend}'","text_content":'${resptext}',"text_times":'${respparts}'}' > "${temppostsolr}"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
 
-						checkfileex=$(curl -s ${checksolr}"/"${coid}"/"${filename})
+						checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 						if [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
-							removefileurl="http://"${curl}":"${curlport}"/api/removefile?date="${todaydate}"&file="${filename}
+							removefileurl="http://${curl}:${curlport}/api/removefile?date=${todaydate}&file=${filename}"
 							curl -s "${removefileurl}"
 						fi
 
