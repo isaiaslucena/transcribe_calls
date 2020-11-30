@@ -117,7 +117,7 @@ for day in $(seq -f "%02g" 1 30) ; do
 
 						temppostsolr=${tempfolder}${filename}"_postsolr.json"
 						echo "Saving into Solr..."
-						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${filename}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${transcstart}'","transc_end":"'${transcend}'","text_content":'${resptext}',"text_times":'${respparts}'}' > "${temppostsolr}"
+						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${filename}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${transcstart}'","transc_end":"'${transcend}'","text_content":"'${resptext}'","text_times":"'${respparts}'"}' > "${temppostsolr}"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
 
 						checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
