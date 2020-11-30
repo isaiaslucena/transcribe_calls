@@ -24,13 +24,13 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 
 # tday=$(date +%d)
 # tmon=$(date +%m)
-# tmon=02
-# tyea=$(date +%Y)
+tmon=10
+tyea=$(date +%Y)
 # tyea=2020
-# for day in $(seq -f "%02g" 1 9) ; do
-	# todaydate=${day}${tmon}${tyea}
+for day in $(seq -f "%02g" 1 30) ; do
+	todaydate=${day}${tmon}${tyea}
 	# todaydate=${day}012019
-	#  echo "${todaydate}"
+	 echo "${todaydate}"
 
 	#get the companies and URLs with port
 	curl -s -o "${tempcojson}" "${companiesurl}"
@@ -179,4 +179,4 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 			rm -rf "${tempnoanswer}"
 		fi
 	done
-# done
+done
