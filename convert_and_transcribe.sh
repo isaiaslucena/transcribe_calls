@@ -101,8 +101,8 @@ for day in $(seq -f "%02g" 1 30) ; do
 
 						#send to transcribe
 						# echo "Starting transcribe..."
-						transcstart=$(date +'%Y-%m-%dT%H:%M:%SZ')
 						# temptransrep=${tempfolder}${filename}"_transcription.json"
+						transcstart=$(date +'%Y-%m-%dT%H:%M:%SZ')
 						# curl -s -o "${temptransrep}" --header "Content-Type: audio/wav" --header "decoder.continuousMode: true" --data-binary "@"${tempfolder}${wavfile} "${transcurl}"
 						transcend=$(date +'%Y-%m-%dT%H:%M:%SZ')
 
@@ -110,7 +110,8 @@ for day in $(seq -f "%02g" 1 30) ; do
 						# respparts=$( jq --compact-output .[0].alternatives[0].words "${temptransrep}")
 
 						resptext="sem texto"
-						respparts="[{\\\"text\\\":\\\"sem texto\\\",\\\"score\\\":100,\\\"start_time\\\":0.1,\\\"end_time\\\":1.0}]"
+						respparts='[{"text":"sem texto","score":100,"start_time":0.1,"end_time":1.0}]'
+						#respparts='[{\"text\":\"sem texto\",\"score\":100,\"start_time\":0.1,\"end_time\":1.0}]'
 
 						# if [[ "${resptext}" == "null" ]] ; then
 							# echo "response CPqD NULL!"
@@ -119,11 +120,12 @@ for day in $(seq -f "%02g" 1 30) ; do
 
 						temppostsolr=${tempfolder}${filename}"_postsolr.json"
 						echo "Saving into Solr..."
-						echo "{\"id_emp\":${coid},\"id_rec\":${fcodigo},\"filename\":\"${filename}\",\"phone\":\"${fphone}\",\"port_rec\":\"${fporta}\",\"type\":\"${ftype}\",\"start_rec\":\"${fstartrec}\",\"end_rec\":\"${fendrec}\",\"transc_start\":\"${transcstart}\",\"transc_end\":\"${transcend}\",\"text_content\":\"${resptext}\",\"text_times\":\"${respparts}\"}" > "${temppostsolr}"
-						if [[ "${stop_at_insert}" == "stop" ]] ; then
-							read
-						fi
-						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
+						echo "{\"id_emp\":${coid},\"id_rec\":${fcodigo},\"filename\":\"${filename}\",\"phone\":\"${fphone}\",\"port_rec\":\"${fporta}\",\"type\":\"${ftype}\",\"start_rec\":\"${fstartrec}\",\"end_rec\":\"${fendrec}\",\"transc_start\":\"${transcstart}\",\"transc_end\":\"${transcend}\",\"text_content\":\"${resptext}\",\"text_times\":${respparts}}" > "${temppostsolr}"
+						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@${temppostsolr}" "${savetransurl}"
+                                                if [[ "${stop_at_insert}" == "stop" ]] ; then
+                                                        read
+                                                fi
+						#sleep 1
 
 						checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 						if [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
