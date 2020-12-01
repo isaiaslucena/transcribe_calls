@@ -122,18 +122,17 @@ for day in $(seq -f "%02g" 1 30) ; do
 						echo "Saving into Solr..."
 						echo "{\"id_emp\":${coid},\"id_rec\":${fcodigo},\"filename\":\"${filename}\",\"phone\":\"${fphone}\",\"port_rec\":\"${fporta}\",\"type\":\"${ftype}\",\"start_rec\":\"${fstartrec}\",\"end_rec\":\"${fendrec}\",\"transc_start\":\"${transcstart}\",\"transc_end\":\"${transcend}\",\"text_content\":\"${resptext}\",\"text_times\":${respparts}}" > "${temppostsolr}"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@${temppostsolr}" "${savetransurl}"
-                                                if [[ "${stop_at_insert}" == "stop" ]] ; then
-                                                        read
-                                                fi
-						#sleep 1
+						if [[ "${stop_at_insert}" == "stop" ]] ; then
+							read
+						fi
+						sleep 1
 
 						checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 						if [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
 							removefileurl="http://${curl}:${curlport}/api/removefile?date=${todaydate}&file=${filename}"
-							curl -s "${removefileurl}"
+							curl -s -o "${removefileurl}"
 						fi
 
-						sleep 1
 						rm -rf ${tempfolder}${wavfile}
 						rm -rf "${temppostsolr}"
 						rm -rf ${tempfolder}${filename}"_respsave.json"
@@ -146,8 +145,8 @@ for day in $(seq -f "%02g" 1 30) ; do
 
 			echo
 			# echo "Getting no answer calls..."
-			getnoanswerurl="http://"${curl}":"${curlport}"/api/getnoanswer?date="${todaydateiso}
-			tempnoanswer=${tempfolder}${todaydateiso}"_noanswer.json"
+			getnoanswerurl="http://${curl}:${curlport}/api/getnoanswer?date=${todaydateiso}"
+			tempnoanswer="${tempfolder}${todaydateiso}_noanswer.json"
 			curl -s -o "${tempnoanswer}" "${getnoanswerurl}"
 			arrn=$(($(jq ". | length" "${tempnoanswer}")-1))
 			if [[ "${arrn}" -ge 0 ]] ; then
@@ -169,18 +168,18 @@ for day in $(seq -f "%02g" 1 30) ; do
 					fcodMoni=$(jq --raw-output .["${noansw}"].codMonitoria "${tempnoanswer}")
 
 					#verify if exists on solr
-					checkfileex=$(curl -s ${checksolrnoaw}"/"${coid}"/"${fcodigo})
+					checkfileex=$(curl -s "${checksolrnoaw}/${coid}/${fcodigo}")
 					if [[ "${checkfileex}" -eq 0 ]] ; then
 						echo "${fnfilen}"
-						echo "ID" "${fcodigo}" "saving into Solr..."
+						echo "ID ${fcodigo} saving into Solr..."
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${fnfilen}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${fstartrec}'","transc_end":"'${fstartrec}'","text_content":["no answer"],"text_times":"[\"no answer\"]"}' > "${temppostsolr}"
-						curl -s -o "${tempfolder}""respsave.json" -H "Content-Type: application/json" -d "@"${temppostsolr} "${savetransurl}"
+						curl -s -o "${tempfolder}""respsave.json" -H "Content-Type: application/json" -d "@${temppostsolr}" "${savetransurl}"
 						# jq . ${tempfolder}${fnfilen}"_respsave_noanswer.json"
 						echo
 					fi
 
 					sleep 1
-					rm -rf ${tempfolder}"respsave.json"
+					rm -rf "${tempfolder}respsave.json"
 					rm -rf "${tempnoanswer}"
 				done
 				echo "Done!"
