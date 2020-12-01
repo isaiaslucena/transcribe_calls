@@ -24,14 +24,15 @@ savetransurl="http://127.0.0.1:83/api/save_file"
 
 stop_at_insert="${3}"
 
-# tday=$(date +%d)
-# tmon=$(date +%m)
-tmon="${1}"
-# tmon=10
-tyea="${2}"
-# tyea=$(date +%Y)
+#tday=$(date +%d)
+day=$(date +%d)
+tmon=$(date +%m)
+#tmon="${1}"
+#tmon=10
+#tyea="${2}"
+tyea=$(date +%Y)
 # tyea=2020
-for day in $(seq -f "%02g" 1 31) ; do
+#for day in $(seq -f "%02g" 1 31) ; do
 	todaydate=${day}${tmon}${tyea}
 	# todaydate=${day}012019
 	 echo "${todaydate}"
@@ -190,4 +191,4 @@ for day in $(seq -f "%02g" 1 31) ; do
 			rm -rf "${tempnoanswer}"
 		fi
 	done
-done
+#done
