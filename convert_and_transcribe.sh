@@ -31,7 +31,7 @@ tmon="${1}"
 tyea="${2}"
 # tyea=$(date +%Y)
 # tyea=2020
-for day in $(seq -f "%02g" 1 30) ; do
+for day in $(seq -f "%02g" 1 31) ; do
 	todaydate=${day}${tmon}${tyea}
 	# todaydate=${day}012019
 	 echo "${todaydate}"
