@@ -130,7 +130,7 @@ for day in $(seq -f "%02g" 1 31) ; do
 						checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 						if [[ "${checkfileex}" -eq 1 && -f "${filedpath}" ]] ; then
 							removefileurl="http://${curl}:${curlport}/api/removefile?date=${todaydate}&file=${filename}"
-							curl -s -o "${removefileurl}"
+							curl -s -o /dev/null "${removefileurl}"
 						fi
 
 						rm -rf ${tempfolder}${wavfile}
