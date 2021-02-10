@@ -23,6 +23,7 @@ transcurl="http://127.0.0.1:8025/asr-server/rest/recognize"
 savetransurl="http://127.0.0.1:83/api/save_file"
 
 stop_at_insert="${3}"
+echo "$(date +'%F %T') - Script start"
 
 #tday=$(date +%d)
 day=$(date +%d)
@@ -35,7 +36,7 @@ tyea=$(date +%Y)
 #for day in $(seq -f "%02g" 1 31) ; do
 	todaydate=${day}${tmon}${tyea}
 	# todaydate=${day}012019
-	 echo "${todaydate}"
+	echo "$(date +'%F %T') - ${todaydate}"
 
 	#get the companies and URLs with port
 	curl -s -o "${tempcojson}" "${companiesurl}"
@@ -61,7 +62,7 @@ tyea=$(date +%Y)
 				#verify if exists on solr
 				checkfileex=$(curl -s "${checksolr}/${coid}/${filename}")
 				if [[ "${checkfileex}" -eq 0 ]] ; then
-					echo "${filename}"
+					echo "$(date +'%F %T') - ${filename}"
 
 					filefinalfolder="${filesfolder}${coid}/${todaydate}"
 					if [[ ! -d "${filefinalfolder}" ]] ; then
@@ -120,7 +121,7 @@ tyea=$(date +%Y)
 						# fi
 
 						temppostsolr=${tempfolder}${filename}"_postsolr.json"
-						echo "Saving into Solr..."
+						echo "$(date +'%F %T') - Saving into Solr..."
 						echo "{\"id_emp\":${coid},\"id_rec\":${fcodigo},\"filename\":\"${filename}\",\"phone\":\"${fphone}\",\"port_rec\":\"${fporta}\",\"type\":\"${ftype}\",\"start_rec\":\"${fstartrec}\",\"end_rec\":\"${fendrec}\",\"transc_start\":\"${transcstart}\",\"transc_end\":\"${transcend}\",\"text_content\":\"${resptext}\",\"text_times\":${respparts}}" > "${temppostsolr}"
 						curl -s -o ${tempfolder}${filename}"_respsave.json" -H "Content-Type: application/json" -d "@${temppostsolr}" "${savetransurl}"
 						if [[ "${stop_at_insert}" == "stop" ]] ; then
@@ -151,7 +152,7 @@ tyea=$(date +%Y)
 			curl -s -o "${tempnoanswer}" "${getnoanswerurl}"
 			arrn=$(($(jq ". | length" "${tempnoanswer}")-1))
 			if [[ "${arrn}" -ge 0 ]] ; then
-				echo "Importing no answer calls..."
+				echo "$(date +'%F %T') - Importing no answer calls..."
 				for noansw in $(seq 0 "${arrn}") ; do
 					fcodigo=$(jq --raw-output .["${noansw}"].Codigo "${tempnoanswer}")
 					fcoment=$(jq --raw-output .["${noansw}"].Coment "${tempnoanswer}")
@@ -171,8 +172,8 @@ tyea=$(date +%Y)
 					#verify if exists on solr
 					checkfileex=$(curl -s "${checksolrnoaw}/${coid}/${fcodigo}")
 					if [[ "${checkfileex}" -eq 0 ]] ; then
-						echo "${fnfilen}"
-						echo "ID ${fcodigo} saving into Solr..."
+						echo "$(date +'%F %T') - ${fnfilen}"
+						echo "$(date +'%F %T') - ID ${fcodigo} saving into Solr..."
 						echo '{"id_emp":'${coid}',"id_rec":'${fcodigo}',"filename":"'${fnfilen}'","phone":"'${fphone}'","port_rec":"'${fporta}'","type":"'${ftype}'","start_rec":"'${fstartrec}'","end_rec":"'${fendrec}'","transc_start":"'${fstartrec}'","transc_end":"'${fstartrec}'","text_content":["no answer"],"text_times":"[\"no answer\"]"}' > "${temppostsolr}"
 						curl -s -o "${tempfolder}""respsave.json" -H "Content-Type: application/json" -d "@${temppostsolr}" "${savetransurl}"
 						# jq . ${tempfolder}${fnfilen}"_respsave_noanswer.json"
@@ -183,7 +184,7 @@ tyea=$(date +%Y)
 					rm -rf "${tempfolder}respsave.json"
 					rm -rf "${tempnoanswer}"
 				done
-				echo "Done!"
+				echo "$(date +'%F %T') - Done!"
 				echo
 			fi
 
@@ -192,3 +193,6 @@ tyea=$(date +%Y)
 		fi
 	done
 #done
+echo "$(date +'%F %T') - Script end"
+echo
+echo
